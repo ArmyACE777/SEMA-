@@ -24,7 +24,7 @@ interface ApiResponse<T = any> {
 }
 
 // ===== CONFIGURATION =====
-const STRAPI_API_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337';
+const STRAPI_API_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL || '${process.env.NEXT_PUBLIC_STRAPI_URL}';
 // const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // ===== TYPE DEFINITIONS =====

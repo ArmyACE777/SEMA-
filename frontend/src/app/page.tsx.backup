@@ -100,7 +100,7 @@ export default function HomePage() {
         if (typeof mediaObj.url === 'string') {
           const url = mediaObj.url
           if (url.startsWith('http')) return url
-          const baseUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337'
+          const baseUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || '${process.env.NEXT_PUBLIC_STRAPI_URL}'
           return `${baseUrl}${url}`
         }
       }

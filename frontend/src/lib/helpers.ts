@@ -63,7 +63,7 @@ export const getImage = (item: StrapiItem | null): string => {
       const url = (gambar as Record<string, any>).url
       if (typeof url === 'string') {
         if (url.startsWith('http')) return url
-        return `${process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337'}${url}`
+        return `${process.env.NEXT_PUBLIC_STRAPI_API_URL || '${process.env.NEXT_PUBLIC_STRAPI_URL}'}${url}`
       }
     }
     
@@ -162,7 +162,7 @@ export const buildApiUrl = (
   endpoint: string,
   params?: Record<string, any>
 ): string => {
-  const baseUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337'
+  const baseUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || '${process.env.NEXT_PUBLIC_STRAPI_URL}'
   const url = new URL(`${baseUrl}${endpoint}`)
   
   if (params) {
