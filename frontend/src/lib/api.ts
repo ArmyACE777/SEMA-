@@ -24,7 +24,7 @@ interface ApiResponse<T = any> {
 }
 
 // ===== CONFIGURATION =====
-const STRAPI_API_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL || '${process.env.NEXT_PUBLIC_STRAPI_URL}';
+const STRAPI_API_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://victorious-animal-46b1eb6b21.strapiapp.com/admin';
 // const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // ===== TYPE DEFINITIONS =====

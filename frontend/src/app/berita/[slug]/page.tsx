@@ -42,7 +42,7 @@ export default function BeritaDetailPage() {
           return
         }
 
-        const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL || '${process.env.NEXT_PUBLIC_STRAPI_URL}'
+        const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://victorious-animal-46b1eb6b21.strapiapp.com/admin'
         console.log(`🔍 Fetching berita: ${slug}`)
 
         let response = await fetch(
@@ -105,7 +105,7 @@ export default function BeritaDetailPage() {
     const url = gambar?.attributes?.url || gambar?.url
     if (!url) return null
     if (url.startsWith('http')) return url
-    return `${process.env.NEXT_PUBLIC_STRAPI_API_URL || '${process.env.NEXT_PUBLIC_STRAPI_URL}'}${url}`
+    return `${process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://victorious-animal-46b1eb6b21.strapiapp.com/admin'}${url}`
   }
 
   const formatDate = (dateString: string | undefined): string => {

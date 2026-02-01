@@ -116,7 +116,7 @@ export default function HomePage() {
         const url = (gambar as Record<string, unknown>).url
         if (typeof url === 'string') {
           if (url.startsWith('http')) return url
-          return `${process.env.NEXT_PUBLIC_STRAPI_API_URL || '${process.env.NEXT_PUBLIC_STRAPI_URL}'}${url}`
+          return `${process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://victorious-animal-46b1eb6b21.strapiapp.com/admin'}${url}`
         }
       }
       return '/images/placeholder.jpg'

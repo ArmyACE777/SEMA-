@@ -33,7 +33,7 @@ export default function BeritaPage() {
     const url = (gambar as any)?.attributes?.url || (gambar as any)?.url
     if (!url) return '/images/placeholder.jpg'
     if (url.startsWith('http')) return url
-    return `${process.env.NEXT_PUBLIC_STRAPI_API_URL || '${process.env.NEXT_PUBLIC_STRAPI_URL}'}${url}`
+    return `${process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://victorious-animal-46b1eb6b21.strapiapp.com/admin'}${url}`
   }
 
   const fetchBerita = useCallback(async (page: number) => {

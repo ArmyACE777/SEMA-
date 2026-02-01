@@ -63,7 +63,7 @@ export const getImage = (item: StrapiItem | null): string => {
       const url = (gambar as Record<string, any>).url
       if (typeof url === 'string') {
         if (url.startsWith('http')) return url
-        return `${process.env.NEXT_PUBLIC_STRAPI_API_URL || '${process.env.NEXT_PUBLIC_STRAPI_URL}'}${url}`
+        return `${process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://victorious-animal-46b1eb6b21.strapiapp.com/admin'}${url}`
       }
     }
     
@@ -162,7 +162,7 @@ export const buildApiUrl = (
   endpoint: string,
   params?: Record<string, any>
 ): string => {
-  const baseUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || '${process.env.NEXT_PUBLIC_STRAPI_URL}'
+  const baseUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://victorious-animal-46b1eb6b21.strapiapp.com/admin'
   const url = new URL(`${baseUrl}${endpoint}`)
   
   if (params) {
