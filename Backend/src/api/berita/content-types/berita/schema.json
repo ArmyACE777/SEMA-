@@ -1,0 +1,50 @@
+{
+  "kind": "collectionType",
+  "collectionName": "beritas",
+  "info": {
+    "singularName": "berita",
+    "pluralName": "beritas",
+    "displayName": "Berita"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title"
+    },
+    "content": {
+      "type": "blocks"
+    },
+    "excerpt": {
+      "type": "string"
+    },
+    "gambar": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "published": {
+      "type": "datetime"
+    },
+    "author": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "json"
+    },
+    "is_featured": {
+      "type": "boolean"
+    }
+  }
+}

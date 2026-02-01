@@ -1,0 +1,738 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { 
+  getBeritaList, 
+  getArtikelList, 
+  getStaffList, 
+  getFeaturedBerita, 
+  searchContent,
+  getStrapiMediaUrl,
+  formatStrapiDate,
+  generateContentExcerpt
+} from '../../lib/api';
+import { Button } from '@/components/ui/Button';
+import { Card, CardContent, CardHeader, ContentCard, StaffCard } from '../../components/ui/Card';
+import { Badge, CategoryBadge } from '@/components/ui/Badge';
+import { Loading, CardSkeleton } from '@/components/ui/Loading';
+import { SearchInput } from '@/components/ui/SearchInput';
+import { Search, RefreshCw, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import type { Berita, Artikel, Staff, SearchResults } from '@/types';
+
+// Auto-search saat user berhenti mengetik (debounced)
+// Show search term di results header
+"Search results for '{query}' - 2 total results"
+
+
+// ===== TYPE DEFINITIONS =====
+type TestStatus = 'success' | 'error' | 'pending';
+type TestResults = Record<string, TestStatus>;
+
+interface LoadingStates {
+  berita: boolean;
+  artikel: boolean;
+  staff: boolean;
+  featured: boolean;
+  search: boolean;
+}
+
+interface APIError extends Error {
+  status?: number;
+  endpoint?: string;
+}
+
+const safeGetString = (value: unknown, fallback: string = ''): string => {
+  if (typeof value === 'string') return value;
+  return fallback;
+};
+
+const safeGetAttributes = (item: unknown): Record<string, unknown> => {
+  if (item && typeof item === 'object' && 'attributes' in item) {
+    const typedItem = item as { attributes: Record<string, unknown> };
+    return typedItem.attributes || {};
+  }
+  return {};
+};
+
+export default function TestAPIPage() {
+  // State untuk data
+  const [beritaList, setBeritaList] = useState<Berita[]>([]);
+  const [artikelList, setArtikelList] = useState<Artikel[]>([]);
+  const [staffList, setStaffList] = useState<Staff[]>([]);
+  const [featuredBerita, setFeaturedBerita] = useState<Berita[]>([]);
+  const [searchResults, setSearchResults] = useState<SearchResults | null>(null);
+  
+  const [loading, setLoading] = useState({
+    berita: false,
+    artikel: false,
+    staff: false,
+    featured: false,
+    search: false,
+  });
+  
+  // State untuk testing
+  const [testResults, setTestResults] = useState<TestResults>({});
+  const [error, setError] = useState<string | null>(null);
+
+  // Helper functions
+  const updateLoading = (key: keyof LoadingStates, value: boolean): void => {
+    setLoading(prev => ({ ...prev, [key]: value }));
+  };
+  const updateTestResult = (test: string, result: TestStatus): void => {
+    setTestResults(prev => ({ ...prev, [test]: result }));
+  };
+
+  // ✅ Safe access helper untuk attributes
+ const safeGetAttributes = (item: unknown): Record<string, unknown> => {
+  if (item && typeof item === 'object' && 'attributes' in item) {
+    const typedItem = item as { attributes: Record<string, unknown> };
+    return typedItem.attributes || {};
+  }
+  return {};
+};
+
+  /// Update safeGetMediaUrl function
+const safeGetMediaUrl = (item: unknown, fieldName: string = 'gambar'): string => {
+  const attrs = safeGetAttributes(item);
+  const mediaField = attrs[fieldName];
+  
+  // Direct media object (Strapi V4 style)
+  if (mediaField && typeof mediaField === 'object' && 'url' in mediaField) {
+    return getStrapiMediaUrl(mediaField);
+  }
+  
+  // Handle null gambar (like your artikel)
+  if (mediaField === null) {
+    return '';
+  }
+  
+  return getStrapiMediaUrl(mediaField);
+};
+
+  // Test API Health
+  const testAPIHealth = async (): Promise<boolean> => {
+    updateTestResult('health', 'pending');
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/beritas?pagination[pageSize]=1`);
+      if (response.ok) {
+        updateTestResult('health', 'success');
+        return true;
+      } else {
+        throw new Error(`API Health Check Failed: ${response.status}`);
+      }
+    } catch (err) {
+      const error = err as APIError;
+      updateTestResult('health', 'error');
+      setError(`API Health Check Failed: ${error.message}`);
+      return false;
+    }
+  };
+
+  // Test Berita API
+  const testBeritaAPI = async (): Promise<void> => {
+    updateLoading('berita', true);
+    updateTestResult('berita', 'pending');
+    setError(null);
+    
+    try {
+      const response = await getBeritaList({ pageSize: 6 });
+      setBeritaList(response.data || []);
+      updateTestResult('berita', 'success');
+      console.log('✅ Berita API Success:', response);
+    } catch (err) {
+      const error = err as APIError;
+      updateTestResult('berita', 'error');
+      setError(`Berita API Error: ${error.message}`);
+      console.error('❌ Berita API Error:', err);
+    } finally {
+      updateLoading('berita', false);
+    }
+  };
+
+  // Test Artikel API
+  const testArtikelAPI = async (): Promise<void> => {
+    updateLoading('artikel', true);
+    updateTestResult('artikel', 'pending');
+    setError(null);
+    
+    try {
+      const response = await getArtikelList({ pageSize: 6 });
+      setArtikelList(response.data || []);
+      updateTestResult('artikel', 'success');
+      console.log('✅ Artikel API Success:', response);
+    } catch (err) {
+      const error = err as APIError;
+      updateTestResult('artikel', 'error');
+      setError(`Artikel API Error: ${error.message}`);
+      console.error('❌ Artikel API Error:', err);
+    } finally {
+      updateLoading('artikel', false);
+    }
+  };
+
+  // Test Staff API
+  const testStaffAPI = async (): Promise<void> => {
+    updateLoading('staff', true);
+    updateTestResult('staff', 'pending');
+    setError(null);
+    
+    try {
+      const response = await getStaffList();
+      setStaffList(response.data || []);
+      updateTestResult('staff', 'success');
+      console.log('✅ Staff API Success:', response);
+    } catch (err) {
+      const error = err as APIError;
+      updateTestResult('staff', 'error');
+      setError(`Staff API Error: ${error.message}`);
+      console.error('❌ Staff API Error:', err);
+    } finally {
+      updateLoading('staff', false);
+    }
+  };
+
+  // Test Featured Berita
+  const testFeaturedAPI = async (): Promise<void> => {
+    updateLoading('featured', true);
+    updateTestResult('featured', 'pending');
+    setError(null);
+    
+    try {
+      const response = await getFeaturedBerita(3);
+      setFeaturedBerita(response.data || []);
+      updateTestResult('featured', 'success');
+      console.log('✅ Featured API Success:', response);
+    } catch (err) {
+      const error = err as APIError;
+      updateTestResult('featured', 'error');
+      setError(`Featured API Error: ${error.message}`);
+      console.error('❌ Featured API Error:', err);
+    } finally {
+      updateLoading('featured', false);
+    }
+  };
+
+  // Test Search API
+const testSearchAPI = async (query: string): Promise<void> => {
+  console.log('🔍 testSearchAPI called with query:', query);
+  
+  if (!query.trim()) {
+    console.log('❌ Empty query detected');
+    setError('Please enter a search query');
+    return;
+  }
+  
+  updateLoading('search', true);
+  updateTestResult('search', 'pending');
+  setError(null);
+  
+  try {
+    console.log('🚀 Starting search...');
+    const results = await searchContent(query);
+    console.log('✅ Search completed, setting results:', results);
+    
+    setSearchResults(results);
+    updateTestResult('search', 'success');
+    console.log('✅ Search API Success:', results);
+  } catch (err) {
+    const error = err as APIError;
+    console.error('❌ Search API Error Details:', {
+      message: error.message,
+      status: error.status,
+      endpoint: error.endpoint,
+      fullError: error
+    });
+    updateTestResult('search', 'error');
+    setError(`Search API Error: ${error.message}`);
+  } finally {
+    updateLoading('search', false);
+  }
+};
+
+// Tambahkan function ini setelah testSearchAPI
+const debugStrapiData = async (): Promise<void> => {
+  console.log('🔍 Starting manual Strapi data check...');
+  
+  try {
+    // Test 1: Check if beritas exist
+    console.log('📰 Testing beritas endpoint...');
+    const beritasResponse = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/beritas?pagination[pageSize]=5`);
+    const beritasData = await beritasResponse.json();
+    console.log('📰 Beritas data:', beritasData);
+    
+    // Test 2: Check if artikels exist  
+    console.log('📚 Testing artikels endpoint...');
+    const artikelsResponse = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/artikels?pagination[pageSize]=5`);
+    const artikelsData = await artikelsResponse.json();
+    console.log('📚 Artikels data:', artikelsData);
+    
+    // Test 3: Manual search test
+    const testQuery = 'test';
+    console.log(`🔍 Testing manual search with query: "${testQuery}"`);
+    const searchResponse = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/beritas?filters[title][$containsi]=${testQuery}`);
+    const searchData = await searchResponse.json();
+    console.log('🔍 Manual search result:', searchData);
+    
+  } catch (error) {
+    console.error('❌ Debug API Error:', error);
+  }
+};
+
+// Tambahkan button untuk debug (dalam Test Controls section)
+<Button 
+  onClick={debugStrapiData}
+  variant="outline"
+  size="sm"
+  className="w-full"
+>
+  Debug Data
+</Button>
+
+  // Test All APIs
+  const testAllAPIs = async (): Promise<void> => {
+    const healthCheck = await testAPIHealth();
+    if (healthCheck) {
+      await Promise.all([
+        testBeritaAPI(),
+        testArtikelAPI(),
+        testStaffAPI(),
+        testFeaturedAPI()
+      ]);
+    }
+  };
+
+  // Clear all data
+  const clearAllData = (): void => {
+    setBeritaList([]);
+    setArtikelList([]);
+    setStaffList([]);
+    setFeaturedBerita([]);
+    setSearchResults(null);
+    setTestResults({});
+    setError(null);
+  };
+
+  // Auto-run health check on component mount
+useEffect(() => {
+  // Run initial health check once on mount
+  void testAPIHealth();
+}, []);
+
+  // Helper component untuk test result icons
+  const TestResultIcon = ({ status }: { status?: TestStatus }) => {
+    switch (status) {
+      case 'success':
+        return <CheckCircle className="w-4 h-4 text-green-600" />;
+      case 'error':
+        return <XCircle className="w-4 h-4 text-red-600" />;
+      case 'pending':
+        return <AlertCircle className="w-4 h-4 text-yellow-600 animate-pulse" />;
+      default:
+        return <div className="w-4 h-4 bg-gray-300 rounded-full" />;
+    }
+  };
+
+  // Helper untuk check if any loading is active
+  const isAnyLoading = Object.values(loading).some(Boolean);
+
+  // Helper untuk safe date access
+const safeGetDate = (item: unknown): string => {
+  const attrs = safeGetAttributes(item);
+  const dateValue = attrs.publishedAt || attrs.published_at || attrs.published || attrs.createdAt;
+  
+  if (typeof dateValue === 'string') {
+    return formatStrapiDate(dateValue);
+  }
+  
+  return '';
+};
+
+  return (
+    <div className="container mx-auto px-4 py-8 space-y-8">
+      {/* Header */}
+      <div className="text-center">
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          🧪 API Integration Test Suite
+        </h1>
+        <p className="text-xl text-gray-600 mb-8">
+          Test semua API endpoints dan verify data integration
+        </p>
+        
+        {/* API Health Status */}
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-50 border">
+          <TestResultIcon status={testResults.health} />
+          <span className="font-medium">
+            API Health: {testResults.health || 'Unknown'}
+          </span>
+        </div>
+      </div>
+
+      {/* Enhanced Error Display dengan more details */}
+{error && (
+  <Card className="border-red-200 bg-red-50">
+    <CardContent className="pt-6">
+      <div className="flex items-start gap-3">
+        <XCircle className="w-5 h-5 text-red-600 mt-0.5 shrink-0" />
+        <div className="flex-1">
+          <h3 className="font-semibold text-red-800 mb-1">Error Detected</h3>
+          <p className="text-red-700 text-sm mb-3">{error}</p>
+          
+          {/* Debug Info */}
+          <details className="text-xs text-red-600">
+            <summary className="cursor-pointer font-medium mb-2">Debug Info (Click to expand)</summary>
+            <div className="bg-red-100 p-2 rounded text-red-800 font-mono">
+              <p>Strapi URL: {process.env.NEXT_PUBLIC_STRAPI_API_URL}</p>
+              <p>Search Results State: {JSON.stringify(searchResults, null, 2)}</p>
+              <p>Test Results: {JSON.stringify(testResults, null, 2)}</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+)}
+
+      {/* Test Controls */}
+      <Card>
+        <CardHeader>
+          <h2 className="text-2xl font-semibold">Test Controls</h2>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* API Test Buttons */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <Button 
+              onClick={testBeritaAPI} 
+              loading={loading.berita}
+              size="sm"
+              className="w-full"
+              icon={<TestResultIcon status={testResults.berita} />}
+            >
+              Test Berita
+            </Button>
+            
+            <Button 
+              onClick={testArtikelAPI} 
+              loading={loading.artikel}
+              size="sm"
+              className="w-full"
+              icon={<TestResultIcon status={testResults.artikel} />}
+            >
+              Test Artikel
+            </Button>
+            
+            <Button 
+              onClick={testStaffAPI} 
+              loading={loading.staff}
+              size="sm"
+              className="w-full"
+              icon={<TestResultIcon status={testResults.staff} />}
+            >
+              Test Staff
+            </Button>
+            
+            <Button 
+              onClick={testFeaturedAPI} 
+              loading={loading.featured}
+              size="sm"
+              className="w-full"
+              icon={<TestResultIcon status={testResults.featured} />}
+            >
+              Test Featured
+            </Button>
+            
+            <Button 
+              onClick={testAllAPIs} 
+              loading={isAnyLoading}
+              variant="success"
+              size="sm"
+              className="w-full"
+              icon={<RefreshCw className="w-4 h-4" />}
+            >
+              Test All
+            </Button>
+            
+            <Button 
+              onClick={clearAllData}
+              variant="outline"
+              size="sm"
+              className="w-full"
+            >
+              Clear All
+            </Button>
+          </div>
+
+          {/* Search Test */}
+          <div className="max-w-md">
+            <SearchInput
+              placeholder="Test search functionality..."
+              onSearch={testSearchAPI}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Featured Berita Results */}
+      {featuredBerita.length > 0 && (
+        <section className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-3xl font-bold">🌟 Featured Berita</h2>
+            <Badge variant="success">{featuredBerita.length} items</Badge>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredBerita.filter(berita => berita && berita.attributes).map((berita) => {
+            const attrs = safeGetAttributes(berita);
+              function safeGetBoolean(value: unknown): boolean {
+                if (typeof value === 'boolean') return value;
+                if (typeof value === 'string') {
+                  const lower = value.toLowerCase();
+                  if (lower === 'true' || lower === '1') return true;
+                  if (lower === 'false' || lower === '0') return false;
+                }
+                if (typeof value === 'number') {
+                  return value === 1;
+                }
+                return false;
+              }
+
+            return (
+              <ContentCard
+                key={berita.id}
+                title={safeGetString(attrs.title, 'No Title')}
+                excerpt={safeGetString(attrs.excerpt, '') || generateContentExcerpt(attrs.content)}
+                image={safeGetMediaUrl(berita, 'gambar')}
+                author={safeGetString(attrs.author, 'Unknown')}
+                date={safeGetDate(berita)}
+                featured={safeGetBoolean(attrs.is_featured || attrs.isFeatured)}
+                onClick={() => console.log('Navigate to:', `/berita/${safeGetString(attrs.slug)}`)}
+              />
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Berita Results */}
+      {beritaList.length > 0 && (
+        <section className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-3xl font-bold">📰 Berita List</h2>
+            <Badge variant="info">{beritaList.length} items</Badge>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {featuredBerita.filter(berita => berita && berita.attributes).map((berita) => {
+        const attrs = safeGetAttributes(berita);
+        return (
+          <ContentCard
+            key={berita.id}
+            title={safeGetString(attrs.title, 'No Title')}
+            excerpt={safeGetString(attrs.excerpt, '') || safeGetString(generateContentExcerpt(attrs.content), '')}
+            image={safeGetMediaUrl(berita, 'gambar')}
+            author={safeGetString(attrs.author, 'Unknown')}
+            date={safeGetDate(berita)}
+            featured={!!(attrs.isFeatured ?? attrs.is_featured)}
+            onClick={() => console.log('Navigate to:', `/berita/${attrs.slug}`)}
+          />
+        );
+      })}
+              </div>
+            </section>
+          )}
+
+      {/* Artikel Results */}
+      {artikelList.length > 0 && (
+        <section className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-3xl font-bold">📚 Artikel List</h2>
+            <Badge variant="primary">{artikelList.length} items</Badge>
+          </div>
+          
+          <div className="space-y-4">
+            {artikelList.filter(artikel => artikel && artikel.attributes).map((artikel) => {
+              const attrs = safeGetAttributes(artikel);
+              return (
+                <Card key={artikel.id} hover className="group">
+                  <CardContent className="p-6">
+                    <div className="flex gap-4">
+                      <div className="w-32 h-24 shrink-0">
+                        <img
+                          src={safeGetMediaUrl(artikel, 'gambar') || '/images/placeholder.jpg'}
+                          alt={safeGetString(attrs.title, 'Artikel Image')}
+                          className="w-full h-full object-cover rounded-lg"
+                        />
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <CategoryBadge category={safeGetString(attrs.category, 'umum')} />
+                          <span className="text-xs text-gray-500">
+                            {formatStrapiDate(safeGetString(attrs.publishedAt || attrs.published_at, ''))}
+                          </span>
+                        </div>
+                        <h3 className="text-lg font-semibold line-clamp-2">
+                          {safeGetString(attrs.title, 'No Title')}
+                        </h3>
+                        <p className="text-gray-600 text-sm line-clamp-2">
+                          {safeGetString(attrs.excerpt, '') || generateContentExcerpt(attrs.content)}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          By {safeGetString(attrs.author, 'Unknown')}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Staff Results */}
+      {staffList.length > 0 && (
+        <section className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-3xl font-bold">👥 Staff List</h2>
+            <Badge variant="secondary">{staffList.length} items</Badge>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            {staffList.filter(staff => staff && staff.attributes).map((staff) => {
+              const attrs = safeGetAttributes(staff);
+              return (
+                <StaffCard
+                  key={staff.id}
+                  name={safeGetString(attrs.name, 'No Name')}
+                  position={safeGetString(attrs.position, 'No Position')}
+                  department={safeGetString(attrs.department) || undefined}
+                  photo={safeGetMediaUrl(staff, 'foto')}
+                  email={safeGetString(attrs.email) || undefined}
+                  onClick={() => console.log('View staff:', safeGetString(attrs.name))}
+                />
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Search Results */}
+      {searchResults && (
+        <section className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-3xl font-bold">🔍 Search Results</h2>
+            <Badge variant="warning">{searchResults.total || 0} total results</Badge>
+          </div>
+          
+          {/* Berita search results */}
+          {searchResults.beritas?.filter(berita => berita && berita.attributes).slice(0, 6).map((berita) => {
+            const attrs = safeGetAttributes(berita);
+            return (
+              <ContentCard
+                key={berita.id}
+                title={safeGetString(attrs.title, 'No Title')}
+                excerpt={safeGetString(attrs.excerpt, '') || generateContentExcerpt(attrs.content)}
+                image={safeGetMediaUrl(berita, 'gambar')}
+                author={safeGetString(attrs.author, 'Unknown')}
+                date={safeGetDate(berita)}
+                className="text-sm"
+              />
+            );
+          })}
+
+          {/* Artikel search results */}
+          {searchResults.artikels?.filter(artikel => artikel && artikel.attributes).slice(0, 4).map((artikel) => {
+            const attrs = safeGetAttributes(artikel);
+            return (
+              <Card key={artikel.id} className="p-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-16 h-16 shrink-0">
+                    <img
+                      src={safeGetMediaUrl(artikel, 'gambar') || '/images/placeholder.jpg'}
+                      alt={safeGetString(attrs.title, 'Artikel')}
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <CategoryBadge category={safeGetString(attrs.category, 'umum')} />
+                    <h4 className="font-semibold line-clamp-1">
+                      {safeGetString(attrs.title, 'No Title')}
+                    </h4>
+                    <p className="text-sm text-gray-600 line-clamp-2">
+                      {safeGetString(attrs.excerpt, '') || generateContentExcerpt(attrs.content)}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+
+
+          {searchResults.artikels && searchResults.artikels.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold flex items-center gap-2">
+                📚 Artikel 
+                <Badge variant="primary" size="xs">{searchResults.artikels.length}</Badge>
+              </h3>
+              <div className="space-y-3">
+                {searchResults.artikels.filter(artikel => artikel && artikel.attributes).slice(0, 4).map((artikel) => {
+                  const attrs = safeGetAttributes(artikel);
+                  return (
+                    <Card key={artikel.id} className="p-4">
+                      <div className="flex items-start gap-4">
+                        <div className="w-16 h-16 shrink-0">
+                          <img
+                            src={safeGetMediaUrl(artikel, 'gambar') || '/images/placeholder.jpg'}
+                            alt={safeGetString(attrs.title, 'Gambar Artikel')}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        </div>
+                        <div className="flex-1 space-y-2">
+                          <div className="flex items-center gap-2">
+                            <CategoryBadge category={typeof attrs.category === 'string' ? attrs.category : 'umum'} />
+                            <span className="text-xs text-gray-500">
+                              {formatStrapiDate(safeGetString(attrs.publishedAt || attrs.published_at, ''))}
+                            </span>
+                          </div>
+                          <h4 className="font-semibold line-clamp-1">{safeGetString(attrs.title, 'No Title')}</h4>
+                          <p className="text-sm text-gray-600 line-clamp-2">
+                            {safeGetString(attrs.excerpt, '') || safeGetString(generateContentExcerpt(attrs.content || ''), '')}
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {(!searchResults.beritas || searchResults.beritas.length === 0) && 
+           (!searchResults.artikels || searchResults.artikels.length === 0) && (
+            <Card className="text-center py-12">
+              <CardContent>
+                <div className="text-gray-500">
+                  <Search className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p className="text-lg font-medium mb-2">No results found</p>
+                  <p className="text-sm">Try different keywords or check your spelling</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </section>
+      )}
+
+      {/* Loading States Demo */}
+      {isAnyLoading && (
+        <section className="space-y-6">
+          <h2 className="text-3xl font-bold">⏳ Loading States</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 3 }, (_, i) => (
+              <CardSkeleton key={i} />
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}

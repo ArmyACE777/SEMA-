@@ -1,0 +1,572 @@
+'use client'
+
+import { useEffect, useState, useCallback } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import {
+  getFeaturedBerita,
+  getBeritaListPaginated,
+  getArtikelListPaginated,
+  getStrapiMediaUrl,
+  generateContentExcerpt,
+  formatStrapiDate
+} from '@/lib/api'
+import { Card } from '@/components/ui/Card'
+import { Pagination } from '@/components/ui/Pagination'
+import { Badge } from '@/components/ui/Badge'
+import CardSkeleton from '@/components/ui/Loading'
+import { Calendar, User, ArrowRight, TrendingUp } from 'lucide-react'
+
+// ✅ Type definitions
+interface StrapiItem {
+  id: number
+  title?: string
+  content?: string
+  author?: string
+  publishedAt?: string
+  category?: string
+  is_featured?: boolean
+  slug?: string
+  documentId?: string
+  gambar?: {
+    id?: number
+    attributes?: {
+      url?: string
+      width?: number
+      height?: number
+      [key: string]: unknown
+    }
+    [key: string]: unknown
+  } | null
+  attributes?: {
+    title?: string
+    content?: string
+    author?: string
+    publishedAt?: string
+    category?: string
+    is_featured?: boolean
+    gambar?: {
+      id?: number
+      attributes?: {
+        url?: string
+        width?: number
+        height?: number
+        [key: string]: unknown
+      }
+      [key: string]: unknown
+    } | null
+  }
+}
+
+export default function HomePage() {
+  const [featured, setFeatured] = useState<StrapiItem[]>([])
+  const [berita, setBerita] = useState<StrapiItem[]>([])
+  const [artikel, setArtikel] = useState<StrapiItem[]>([])
+  const [popular, setPopular] = useState<StrapiItem[]>([])
+
+  const [beritaPagination, setBeritaPagination] = useState({
+    page: 1,
+    pageSize: 6,
+    pageCount: 1,
+    total: 0
+  })
+
+  const [loading, setLoading] = useState({
+    featured: false,
+    berita: false,
+    artikel: false
+  })
+
+  // ✅ Safe getters
+  const getTitle = (item: StrapiItem): string => {
+    if (!item) return 'Tanpa Judul'
+    return item.title || item.attributes?.title || 'Tanpa Judul'
+  }
+
+  const getContent = (item: StrapiItem): string => {
+    if (!item) return ''
+    return item.content || item.attributes?.content || ''
+  }
+
+  const getImage = (item: StrapiItem): string => {
+    try {
+      if (!item) return '/images/placeholder.jpg'
+      const gambar = item.gambar || item.attributes?.gambar
+      if (!gambar) return '/images/placeholder.jpg'
+      
+      // Handle direct URL format
+      if (typeof gambar === 'object' && gambar !== null && 'url' in gambar) {
+        const mediaObj = gambar as { url?: string }
+        if (typeof mediaObj.url === 'string') {
+          const url = mediaObj.url
+          if (url.startsWith('http')) return url
+          const baseUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337'
+          return `${baseUrl}${url}`
+        }
+      }
+      
+      // Fallback
+      return '/images/placeholder.jpg'
+    } catch (error) {
+      console.error('Error getting image:', error)
+      return '/images/placeholder.jpg'
+    }
+  }
+
+  const getAuthor = (item: StrapiItem): string => {
+    if (!item) return 'Unknown'
+    return item.author || item.attributes?.author || 'Unknown'
+  }
+
+  const getDate = (item: StrapiItem): string => {
+    try {
+      if (!item) return ''
+      const date = item.publishedAt || item.attributes?.publishedAt || ''
+      return date ? formatStrapiDate(date) : ''
+    } catch {
+      return ''
+    }
+  }
+
+  const getCategory = (item: StrapiItem): string => {
+    if (!item) return 'Umum'
+    return item.category || item.attributes?.category || 'Umum'
+  }
+
+  const getSlug = (item: StrapiItem): string => {
+    if (!item) return ''
+    return item.slug || item.documentId || ''
+  }
+
+  // ✅ Safe filter dengan type guard
+  const safeFilter = (items: unknown[]): StrapiItem[] => {
+    if (!Array.isArray(items)) return []
+    return items.filter((item): item is StrapiItem => {
+      if (!item || typeof item !== 'object') return false
+      const typedItem = item as StrapiItem
+      return Boolean(typedItem.title || typedItem.attributes?.title)
+    })
+  }
+
+  // ✅ Fetch data
+  const fetchData = useCallback(async () => {
+    setLoading({ featured: true, berita: true, artikel: true })
+    try {
+      console.log('🔄 Fetching homepage data...')
+      const results = await Promise.allSettled([
+        getFeaturedBerita(3),
+        getBeritaListPaginated({ page: 1, pageSize: 6 }),
+        getArtikelListPaginated({ page: 1, pageSize: 4 })
+      ])
+
+      const featuredData = results[0].status === 'fulfilled' ? results[0].value?.data : []
+      const beritaData = results[1].status === 'fulfilled' ? results[1].value : null
+      const artikelData = results[2].status === 'fulfilled' ? results[2].value?.data : []
+
+      const filteredFeatured = safeFilter(featuredData || [])
+      const filteredBerita = safeFilter(beritaData?.data || [])
+      const filteredArtikel = safeFilter(artikelData || [])
+
+      setFeatured(filteredFeatured)
+      setBerita(filteredBerita)
+      setArtikel(filteredArtikel)
+      setPopular(filteredBerita.slice(0, 5))
+      setBeritaPagination(beritaData?.meta?.pagination || { page: 1, pageSize: 6, pageCount: 0, total: 0 })
+
+      console.log('✅ Data loaded successfully')
+    } catch (err) {
+      console.error('❌ Homepage fetch error:', err)
+    } finally {
+      setLoading({ featured: false, berita: false, artikel: false })
+    }
+  }, [])
+
+  const handlePageChange = async (page: number) => {
+    setLoading(prev => ({ ...prev, berita: true }))
+    try {
+      const response = await getBeritaListPaginated({ page, pageSize: 6 })
+      setBerita(safeFilter(response.data || []))
+      setBeritaPagination(response.meta?.pagination || beritaPagination)
+    } catch (error) {
+      console.error('❌ Pagination error:', error)
+    } finally {
+      setLoading(prev => ({ ...prev, berita: false }))
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* ============ HERO SECTION ============ */}
+      <section className="relative bg-linear-to-br from-primary-600 via-primary-700 to-primary-900 text-white overflow-hidden">
+        <div className="absolute inset-0 bg-[url('/images/pattern.svg')] opacity-10" />
+        <div className="container mx-auto px-4 py-20 relative z-10">
+          <div className="max-w-4xl mx-auto text-center space-y-6">
+            <h1 className="text-5xl md:text-6xl font-bold leading-tight">
+              Himpunan Mahasiswa IAIPI
+            </h1>
+            <p className="text-xl md:text-2xl text-primary-100">
+              Berita dan informasi terkini kegiatan kampus, mahasiswa, serta publikasi HIMA IAIPI.
+            </p>
+            <div className="flex flex-wrap gap-4 justify-center pt-4">
+              <Link
+                href="/berita"
+                className="inline-flex items-center gap-2 bg-white text-primary-700 font-semibold px-8 py-3 rounded-lg hover:bg-primary-50 transition-all hover:scale-105 shadow-lg"
+              >
+                Lihat Berita
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+              <Link
+                href="/artikel"
+                className="inline-flex items-center gap-2 bg-primary-800 text-white font-semibold px-8 py-3 rounded-lg hover:bg-primary-900 transition-all border-2 border-white/20"
+              >
+                Baca Artikel
+              </Link>
+            </div>
+          </div>
+        </div>
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-linear-to-t from-gray-50 to-transparent" />
+      </section>
+
+      {/* ============ MAIN CONTENT ============ */}
+      <div className="container mx-auto px-4 -mt-8 relative z-20">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8">
+          {/* ============ LEFT COLUMN ============ */}
+          <div className="space-y-12">
+            {/* ============ FEATURED SECTION ============ */}
+            {loading.featured ? (
+              <section className="space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-1 h-8 bg-yellow-500 rounded-full" />
+                  <h2 className="text-3xl font-bold text-gray-900">🌟 Berita Unggulan</h2>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {[1, 2].map(i => <CardSkeleton key={i} />)}
+                </div>
+              </section>
+            ) : featured.length > 0 ? (
+              <section className="space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-1 h-8 bg-yellow-500 rounded-full" />
+                  <h2 className="text-3xl font-bold text-gray-900">🌟 Berita Unggulan</h2>
+                  <Badge variant="success" className="ml-auto">{featured.length}</Badge>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {featured.map((item, index) => (
+                    <Link
+                      key={item.id}
+                      href={`/berita/${getSlug(item)}`}
+                      className={`group ${index === 0 ? 'md:col-span-2' : ''}`}
+                    >
+                      <Card className="overflow-hidden hover:shadow-2xl transition-all duration-300 h-full">
+                        <div className={`relative ${index === 0 ? 'h-96' : 'h-64'} overflow-hidden bg-gray-200`}>
+                          <Image
+                            src={getImage(item)}
+                            alt={getTitle(item)}
+                            fill
+                            className="object-cover group-hover:scale-110 transition-transform duration-500"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          />
+                          <div className="absolute top-4 right-4">
+                            <Badge variant="warning" className="backdrop-blur-sm bg-yellow-500/90">
+                              Featured
+                            </Badge>
+                          </div>
+                          {getCategory(item) && (
+                            <div className="absolute top-4 left-4">
+                              <Badge variant="primary" className="backdrop-blur-sm">
+                                {getCategory(item)}
+                              </Badge>
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-6 space-y-3">
+                          <h3 className="text-2xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors line-clamp-2">
+                            {getTitle(item)}
+                          </h3>
+                          <p className="text-gray-600 line-clamp-3">
+                            {generateContentExcerpt(getContent(item), 150)}
+                          </p>
+                          <div className="flex items-center gap-4 text-sm text-gray-500 pt-2">
+                            <span className="flex items-center gap-1">
+                              <User className="w-4 h-4" />
+                              {getAuthor(item)}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-4 h-4" />
+                              {getDate(item)}
+                            </span>
+                          </div>
+                        </div>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            {/* ============ BERITA TERBARU SECTION ============ */}
+            <section className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-1 h-8 bg-primary-600 rounded-full" />
+                  <h2 className="text-3xl font-bold text-gray-900">📰 Berita Terbaru</h2>
+                </div>
+                <Link
+                  href="/berita"
+                  className="text-primary-600 hover:text-primary-700 font-semibold flex items-center gap-2 group"
+                >
+                  Lihat Semua
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
+
+              {loading.berita ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {[1, 2, 3, 4].map(i => <CardSkeleton key={i} />)}
+                </div>
+              ) : berita.length > 0 ? (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {berita.map(item => (
+                      <Link
+                        key={item.id}
+                        href={`/berita/${getSlug(item)}`}
+                        className="group"
+                      >
+                        <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 h-full">
+                          <div className="relative h-48 overflow-hidden bg-gray-200">
+                            <Image
+                              src={getImage(item)}
+                              alt={getTitle(item)}
+                              fill
+                              className="object-cover group-hover:scale-110 transition-transform duration-500"
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            />
+                            {getCategory(item) && (
+                              <div className="absolute top-3 left-3">
+                                <Badge variant="info" className="backdrop-blur-sm">
+                                  {getCategory(item)}
+                                </Badge>
+                              </div>
+                            )}
+                          </div>
+                          <div className="p-5 space-y-3">
+                            <h3 className="text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors line-clamp-2">
+                              {getTitle(item)}
+                            </h3>
+                            <p className="text-sm text-gray-600 line-clamp-2">
+                              {generateContentExcerpt(getContent(item), 120)}
+                            </p>
+                            <div className="flex items-center gap-3 text-xs text-gray-500 pt-2 border-t">
+                              <span className="flex items-center gap-1">
+                                <User className="w-3 h-3" />
+                                {getAuthor(item)}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Calendar className="w-3 h-3" />
+                                {getDate(item)}
+                              </span>
+                            </div>
+                          </div>
+                        </Card>
+                      </Link>
+                    ))}
+                  </div>
+
+                  {beritaPagination.pageCount > 1 && (
+                    <Pagination
+                      currentPage={beritaPagination.page}
+                      totalPages={beritaPagination.pageCount}
+                      totalItems={beritaPagination.total}
+                      pageSize={beritaPagination.pageSize}
+                      onPageChange={handlePageChange}
+                      loading={loading.berita}
+                      className="mt-8"
+                    />
+                  )}
+                </>
+              ) : (
+                <Card className="text-center py-12">
+                  <p className="text-gray-500">Belum ada berita untuk ditampilkan.</p>
+                </Card>
+              )}
+            </section>
+
+            {/* ============ ARTIKEL TERBARU SECTION ============ */}
+            <section className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-1 h-8 bg-purple-600 rounded-full" />
+                  <h2 className="text-3xl font-bold text-gray-900">📚 Artikel Terbaru</h2>
+                </div>
+                <Link
+                  href="/artikel"
+                  className="text-primary-600 hover:text-primary-700 font-semibold flex items-center gap-2 group"
+                >
+                  Lihat Semua
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
+
+              {loading.artikel ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map(i => <CardSkeleton key={i} />)}
+                </div>
+              ) : artikel.length > 0 ? (
+                <div className="space-y-4">
+                  {artikel.map(item => (
+                    <Link
+                      key={item.id}
+                      href={`/artikel/${getSlug(item)}`}
+                      className="group"
+                    >
+                      <Card className="overflow-hidden hover:shadow-lg transition-all duration-300">
+                        <div className="flex gap-4 p-4">
+                          <div className="relative w-40 h-32 shrink-0 overflow-hidden rounded-lg bg-gray-200">
+                            <Image
+                              src={getImage(item)}
+                              alt={getTitle(item)}
+                              fill
+                              className="object-cover group-hover:scale-110 transition-transform duration-500"
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            />
+                          </div>
+                          <div className="flex-1 space-y-2">
+                            {getCategory(item) && (
+                              <Badge variant="secondary" size="sm">{getCategory(item)}</Badge>
+                            )}
+                            <h3 className="text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors line-clamp-2">
+                              {getTitle(item)}
+                            </h3>
+                            <p className="text-sm text-gray-600 line-clamp-2">
+                              {generateContentExcerpt(getContent(item), 100)}
+                            </p>
+                            <div className="flex items-center gap-3 text-xs text-gray-500">
+                              <span className="flex items-center gap-1">
+                                <User className="w-3 h-3" />
+                                {getAuthor(item)}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Calendar className="w-3 h-3" />
+                                {getDate(item)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <Card className="text-center py-12">
+                  <p className="text-gray-500">Belum ada artikel untuk ditampilkan.</p>
+                </Card>
+              )}
+            </section>
+          </div>
+
+          {/* ============ RIGHT COLUMN - SIDEBAR ============ */}
+          <aside className="space-y-6">
+            {/* ============ POPULAR POSTS ============ */}
+            <Card className="sticky top-4">
+              <div className="p-6 space-y-4">
+                <div className="flex items-center gap-2 pb-3 border-b-2 border-primary-600">
+                  <TrendingUp className="w-5 h-5 text-primary-600" />
+                  <h3 className="font-bold text-lg text-gray-900">Populer</h3>
+                </div>
+
+                {popular.length === 0 ? (
+                  <p className="text-sm text-gray-500 text-center py-8">
+                    Belum ada berita populer
+                  </p>
+                ) : (
+                  <div className="space-y-4">
+                    {popular.map((item, index) => (
+                      <Link
+                        key={item.id}
+                        href={`/berita/${getSlug(item)}`}
+                        className="group block"
+                      >
+                        <div className="flex gap-3">
+                          <div className="shrink-0 w-8 h-8 bg-primary-100 text-primary-700 rounded-full flex items-center justify-center font-bold text-sm">
+                            {index + 1}
+                          </div>
+                          <div className="flex-1 space-y-1">
+                            <h4 className="text-sm font-semibold text-gray-900 group-hover:text-primary-600 transition-colors line-clamp-2">
+                              {getTitle(item)}
+                            </h4>
+                            <p className="text-xs text-gray-500 flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              {getDate(item)}
+                            </p>
+                          </div>
+                        </div>
+                        {index < popular.length - 1 && (
+                          <div className="border-b border-gray-100 mt-3" />
+                        )}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            {/* ============ CATEGORIES WIDGET ============ */}
+            <Card>
+              <div className="p-6 space-y-4">
+                <h3 className="font-bold text-lg text-gray-900 pb-3 border-b-2 border-primary-600">
+                  Kategori
+                </h3>
+                <div className="space-y-2">
+                  {['Akademik', 'Kemahasiswaan', 'Organisasi', 'Umum'].map(cat => (
+                    <Link
+                      key={cat}
+                      href={`/berita?category=${cat}`}
+                      className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-primary-50 transition-colors group"
+                    >
+                      <span className="text-sm font-medium text-gray-700 group-hover:text-primary-700">
+                        {cat}
+                      </span>
+                      <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-primary-600 group-hover:translate-x-1 transition-all" />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </Card>
+          </aside>
+        </div>
+      </div>
+
+      {/* ============ FOOTER CTA SECTION ============ */}
+      <section className="mt-20 bg-linear-to-r from-primary-600 to-primary-800 text-white py-16">
+        <div className="container mx-auto px-4 text-center space-y-6">
+          <h2 className="text-3xl md:text-4xl font-bold">Ikuti Kegiatan Kami</h2>
+          <p className="text-xl text-primary-100 max-w-2xl mx-auto">
+            Dapatkan update terbaru seputar kegiatan HIMA IAIPI langsung di inbox Anda
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center pt-4">
+            <a
+              href="https://instagram.com/hima.iaipi"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-white text-primary-700 px-6 py-3 rounded-lg font-semibold hover:bg-primary-50 transition-all"
+            >
+              Follow Instagram
+            </a>
+            <a
+              href="/contact"
+              className="bg-primary-900 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-950 transition-all border-2 border-white/20"
+            >
+              Hubungi Kami
+            </a>
+          </div>
+        </div>
+      </section>
+    </div>
+  )
+}

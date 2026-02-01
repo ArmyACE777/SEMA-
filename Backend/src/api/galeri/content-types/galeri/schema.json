@@ -1,0 +1,41 @@
+{
+  "kind": "collectionType",
+  "collectionName": "galeris",
+  "info": {
+    "singularName": "galeri",
+    "pluralName": "galeris",
+    "displayName": "Galeri"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title"
+    },
+    "deskripsi": {
+      "type": "text"
+    },
+    "gambar": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "event_date": {
+      "type": "date"
+    },
+    "tags": {
+      "type": "json"
+    }
+  }
+}
