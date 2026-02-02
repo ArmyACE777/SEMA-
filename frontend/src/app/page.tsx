@@ -20,6 +20,24 @@ import PengumumanModal from '@/components/PengumumanModal'
 import { OrganisasiSidebar } from '@/components/ui/layout/OrganisasiSidebar'
 import { FooterSection } from '@/components/layout/FooterSection'
 
+export const getImage = (item: StrapiItem): string => {
+  try {
+    if (!item) return '/images/placeholder.jpg'
+
+    const url =
+      item.attributes?.gambar?.data?.attributes?.url ||
+      item.gambar?.data?.attributes?.url
+
+    if (!url) return '/images/placeholder.jpg'
+
+    if (url.startsWith('http')) return url
+
+    return `${process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://victorious-animal-46b1eb6b21.strapiapp.com'}${url}`
+  } catch {
+    return '/images/placeholder.jpg'
+  }
+}
+
 /**
  * ============ TYPE DEFINITIONS ============
  * EXACT from original - fully tested & working
@@ -35,12 +53,14 @@ interface StrapiItem {
   slug?: string
   documentId?: string
   gambar?: {
-    id?: number
-    attributes?: {
-      url?: string
-      width?: number
-      height?: number
-      [key: string]: unknown
+    data?: {
+      id?: number
+      attributes?: {
+        url?: string
+        width?: number
+        height?: number
+        [key: string]: unknown
+      }
     }
   } | null
   attributes?: {
@@ -51,12 +71,14 @@ interface StrapiItem {
     category?: string
     is_featured?: boolean
     gambar?: {
-      id?: number
-      attributes?: {
-        url?: string
-        width?: number
-        height?: number
-        [key: string]: unknown
+      data?: {
+        id?: number
+        attributes?: {
+          url?: string
+          width?: number
+          height?: number
+          [key: string]: unknown
+        }
       }
     } | null
   }
@@ -64,6 +86,7 @@ interface StrapiItem {
   startDate?: string
   endDate?: string
 }
+
 
 
 export default function HomePage() {
@@ -105,24 +128,6 @@ export default function HomePage() {
   const getContent = (item: StrapiItem): string => {
     if (!item) return ''
     return item.content || item.attributes?.content || ''
-  }
-
-  const getImage = (item: StrapiItem): string => {
-    try {
-      if (!item) return '/images/placeholder.jpg'
-      const gambar = item.gambar || item.attributes?.gambar
-      if (!gambar) return '/images/placeholder.jpg'
-      if (typeof gambar === 'object' && gambar !== null) {
-        const url = (gambar as Record<string, unknown>).url
-        if (typeof url === 'string') {
-          if (url.startsWith('http')) return url
-          return `${process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://victorious-animal-46b1eb6b21.strapiapp.com/admin'}${url}`
-        }
-      }
-      return '/images/placeholder.jpg'
-    } catch {
-      return '/images/placeholder.jpg'
-    }
   }
 
   const handlePengumumanClick = (item: StrapiItem) => {

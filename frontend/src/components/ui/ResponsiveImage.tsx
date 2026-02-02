@@ -50,7 +50,7 @@ export function ResponsiveImage({
       for (const format of availableFormats) {
         if (media.formats[format]?.url) {
           const url = media.formats[format].url;
-          return url.startsWith('http') ? url : `https://victorious-animal-46b1eb6b21.strapiapp.com/admin${url}`;
+          return url.startsWith('http') ? url : `https://victorious-animal-46b1eb6b21.strapiapp.com${url}`;
         }
       }
     }

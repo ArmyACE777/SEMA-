@@ -40,11 +40,11 @@ export const EXCERPT = {
 
 // API ENDPOINTS
 export const API = {
-  BASE_URL: process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://victorious-animal-46b1eb6b21.strapiapp.com/admin',
+  BASE_URL: process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://victorious-animal-46b1eb6b21.strapiapp.com',
   ENDPOINTS: {
     BERITA: '/beritas',
     ARTIKEL: '/artikels',
-    PENGUMUMAN: '/pengumans',
+    PENGUMUMAN: '/pengumumen',
     GALERI: '/galeris',
     FEATURED: '/beritas?filters[is_featured][$eq]=true'
   }
