@@ -37,6 +37,10 @@ interface RelatedBerita {
   }
 }
 
+export const dynamic = 'force-dynamic'
+export const dynamicParams = true
+
+
 export default function BeritaDetailPage() {
   const params = useParams()
   const slug = String(params?.slug || '')
