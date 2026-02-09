@@ -146,7 +146,7 @@ export function CardImage({
           sizes={sizes}
           onError={(e) => {
             const target = e.target as HTMLImageElement;
-            target.src = '/images/placeholder.jpg';
+            target.src = '/images/placeholder.svg';
           }}
         />
       ) : (

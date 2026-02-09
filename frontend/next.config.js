@@ -25,7 +25,7 @@ const nextConfig = {
       // 🔹 Placeholder eksternal (kalau kamu pakai, opsional)
       {
         protocol: 'https',
-        hostname: 'placeholder.jpg',
+        hostname: 'placeholder.svg',
         port: '',
         pathname: '/**',
       },

@@ -22,19 +22,19 @@ import { FooterSection } from '@/components/layout/FooterSection'
 
 export const getImage = (item: StrapiItem): string => {
   try {
-    if (!item) return '/images/placeholder.jpg'
+    if (!item) return '/images/placeholder.svg'
 
     const url =
       item.attributes?.gambar?.data?.attributes?.url ||
       item.gambar?.data?.attributes?.url
 
-    if (!url) return '/images/placeholder.jpg'
+    if (!url) return '/images/placeholder.svg'
 
     if (url.startsWith('http')) return url
 
     return `${process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://victorious-animal-46b1eb6b21.strapiapp.com'}${url}`
   } catch {
-    return '/images/placeholder.jpg'
+    return '/images/placeholder.svg'
   }
 }
 

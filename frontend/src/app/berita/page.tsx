@@ -29,9 +29,9 @@ export default function BeritaPage() {
 
   const getImageUrl = (item: StrapiItem): string => {
     const gambar = item.gambar
-    if (!gambar) return '/images/placeholder.jpg'
+    if (!gambar) return '/images/placeholder.svg'
     const url = (gambar as any)?.attributes?.url || (gambar as any)?.url
-    if (!url) return '/images/placeholder.jpg'
+    if (!url) return '/images/placeholder.svg'
     if (url.startsWith('http')) return url
     return `${process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://victorious-animal-46b1eb6b21.strapiapp.com'}${url}`
   }
