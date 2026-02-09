@@ -22,6 +22,11 @@ const nextConfig = {
         port: '',
         pathname: '/uploads/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'victorious-animal-46b1eb6b21.media.strapiapp.com',
+        pathname: '/**',
+      },
       // 🔹 Placeholder eksternal (kalau kamu pakai, opsional)
       {
         protocol: 'https',
