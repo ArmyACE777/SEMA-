@@ -25,7 +25,7 @@ export function OrganisasiSidebar() {
       color: 'from-blue-500 to-blue-600',
       bgColor: 'bg-blue-50',
       textColor: 'text-blue-600',
-      href: '/organisasi/kebma',
+      href: '/organisasi',
       anggota: 0,
     },
 

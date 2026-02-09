@@ -21,7 +21,7 @@ export const GRID = {
 
 // IMAGE CONFIGURATION
 export const IMAGE = {
-  PLACEHOLDER: '/images/placeholder.svg',
+  PLACEHOLDER: '/images/placeholder.svg',  // ← GANTI dari .jpg ke .svg
   SIZES: '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw',
   ASPECT_RATIOS: {
     FEATURED: 'aspect-video',
@@ -30,6 +30,7 @@ export const IMAGE = {
     PORTRAIT: 'aspect-[3/4]'
   }
 } as const
+
 
 // EXCERPT LENGTHS
 export const EXCERPT = {

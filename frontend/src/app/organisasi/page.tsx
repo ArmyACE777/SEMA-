@@ -1,10 +1,8 @@
 'use client'
 
-import { useParams } from 'next/navigation'
-import Image from 'next/image'
-import Link from 'next/link'
-import { ArrowLeft, Users, Briefcase, Mail, Phone, MapPin, Target, ListChecks } from 'lucide-react'
-
+import Image from 'next/image' 
+import Link from 'next/link' 
+import { ArrowLeft, Users, Mail } from 'lucide-react'
 interface OrganisasiDetail {
   slug: string
   nama: string
@@ -65,11 +63,17 @@ const logos = [
 ]
 
 export default function OrganisasiDetailPage() {
-  const params = useParams()
-  const slug = params?.slug as string
 
-  const org = organisasiDetails[slug as keyof typeof organisasiDetails]
-
+const org = { 
+  slug: 'kebma', 
+  nama: 'KEBMA', 
+  logo: '/images/Kebma.jpeg', 
+  fullName: 'Keluarga Besar Mahasiswa', 
+  deskripsi: 'Organisasi tertinggi tingkat mahasiswa...', 
+  anggota: 50, kontak: { email: 'sema@hima-iaipi.ac.id', 
+    phone: '+62 812-3456-7890', lokasi: 'Ruang SEMA, Gedung Mahasiswa Lt. 2', }, 
+    color: 'from-blue-500 to-blue-600', bgColor: 'bg-blue-50', textColor: 'text-blue-600', }
+    
   if (!org) {
     return (
       <div className="min-h-screen flex items-center justify-center">
