@@ -295,11 +295,14 @@ const isValidDateRange = (item: StrapiItem): boolean => {
                 <Card className="mb-8 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
                   <div className="relative w-full h-96">
                     <Image
-                      src={getImage(featured[0])}
+                      src={getImage(featured[0]) || '/images/placeholder.svg'}
                       alt={getTitle(featured[0])}
                       fill
+                      priority
+                      sizes="100vw"
                       className="object-cover"
                     />
+
                     <div className="absolute top-4 left-4">
                       <Badge>{getCategory(featured[0])}</Badge>
                     </div>
@@ -336,16 +339,19 @@ const isValidDateRange = (item: StrapiItem): boolean => {
               ) : berita.length > 0 ? (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    {berita.map(item => (
-                      <Link key={item.id} href={`/berita/${getSlug(item)}`}>
-                        <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full">
-                          <div className="relative w-full h-48">
-                            <Image
-                              src={getImage(item)}
-                              alt={getTitle(item)}
-                              fill
-                              className="object-cover"
-                            />
+                    {berita.map((item) => (
+                    <Link key={item.id} href={`/berita/${getSlug(item)}`}>
+                      <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full">
+                        <div className="relative w-full h-48 overflow-hidden bg-gray-200">
+                          <Image
+                            src={getImage(item) || '/images/placeholder.svg'}
+                            alt={getTitle(item)}
+                            width={400}
+                            height={250}
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            className="object-cover w-full h-full"
+                          />
+
                             {getCategory(item) && (
                               <div className="absolute top-3 left-3">
                                 <Badge>{getCategory(item)}</Badge>
@@ -467,15 +473,18 @@ const isValidDateRange = (item: StrapiItem): boolean => {
               </Link>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {galeri.map(item => (
+              {galeri.map((item) => (
                 <Link key={item.id} href={`/galeri/${getSlug(item)}`}>
-                  <div className="relative w-full h-48 rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group">
+                  <div className="relative w-full h-48 rounded-lg overflow-hidden bg-gray-200 ...">
                     <Image
-                      src={getImage(item)}
+                      src={getImage(item) || '/images/placeholder.svg'}
                       alt={getTitle(item)}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform"
+                      width={300}
+                      height={200}
+                      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                      className="object-cover w-full h-full group-hover:scale-105 transition-transform"
                     />
+
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-end">
                       <p className="text-white text-sm font-medium p-3 line-clamp-1">
                         {getTitle(item)}
