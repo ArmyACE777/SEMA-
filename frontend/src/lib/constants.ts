@@ -21,7 +21,7 @@ export const GRID = {
 
 // IMAGE CONFIGURATION
 export const IMAGE = {
-  PLACEHOLDER: '/images/placeholder.jpg',
+  PLACEHOLDER: '/images/placeholder.svg',
   SIZES: '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw',
   ASPECT_RATIOS: {
     FEATURED: 'aspect-video',

@@ -1,16 +1,33 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-   eslint: {
+  eslint: {
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: ['localhost'],
+    // domains lama sebenarnya sudah tidak perlu, tapi boleh dibiarkan atau dihapus
+    // domains: ['localhost'],
+
     remotePatterns: [
+      // 🔹 Strapi lokal (kalau masih dipakai di dev)
       {
         protocol: 'http',
         hostname: 'localhost',
         port: '1337',
         pathname: '/uploads/**',
+      },
+      // 🔹 Strapi Cloud (production)
+      {
+        protocol: 'https',
+        hostname: 'victorious-animal-46b1eb6b21.strapiapp.com',
+        port: '',
+        pathname: '/uploads/**',
+      },
+      // 🔹 Placeholder eksternal (kalau kamu pakai, opsional)
+      {
+        protocol: 'https',
+        hostname: 'placeholder.jpg',
+        port: '',
+        pathname: '/**',
       },
     ],
   },

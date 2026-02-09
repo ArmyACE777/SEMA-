@@ -1,0 +1,14 @@
+'EOF'
+<svg width="800" height="450" xmlns="http://www.w3.org/2000/svg">
+  <rect fill="#e5e7eb" width="800" height="450"/>
+  <text 
+    x="50%" 
+    y="50%" 
+    font-family="Arial, sans-serif" 
+    font-size="24" 
+    fill="#9ca3af" 
+    text-anchor="middle" 
+    dominant-baseline="middle"
+  >No Image</text>
+</svg>
+EOF
