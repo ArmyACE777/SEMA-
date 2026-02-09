@@ -42,7 +42,7 @@ export default function BeritaDetailPage() {
           return
         }
 
-        const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://victorious-animal-46b1eb6b21.strapiapp.com/admin'
+        const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://victorious-animal-46b1eb6b21.strapiapp.com'
         console.log(`🔍 Fetching berita: ${slug}`)
 
         let response = await fetch(
@@ -76,7 +76,7 @@ export default function BeritaDetailPage() {
           }
         }
 
-        response = await fetch(`${STRAPI_URL}/api/beritas/${slug}?populate=*`, { cache: 'no-store' })
+        response = await fetch(`${STRAPI_URL}/api/beritas?filters[slug][$eq]=${encodeURIComponent(slug)}&populate=*`, { cache: 'no-store' })
         if (response?.ok) {
           const data = await response.json()
           if (data?.id) {
