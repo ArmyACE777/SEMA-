@@ -279,6 +279,26 @@ const isValidDateRange = (item: StrapiItem): boolean => {
     fetchData()
   }, [fetchData])
 
+  // Debug: Cek data gambar berita
+useEffect(() => {
+  console.log('=== HOMEPAGE DEBUG ===');
+  console.log('Total berita:', berita.length);
+  
+  if (berita.length > 0) {
+    // Test 3 berita pertama
+    berita.slice(0, 3).forEach((item, index) => {
+      console.log(`\nBerita ${index + 1}:`);
+      console.log('  Title:', getTitle(item));
+      console.log('  item.gambar:', item.gambar);
+      console.log('  item.attributes?.gambar:', item.attributes?.gambar);
+      console.log('  getImage() result:', getImage(item));
+    });
+  }
+  
+  console.log('=== END DEBUG ===\n');
+}, [berita]);
+
+
   // ============ RENDER ============
   return (
     <div className="min-h-screen bg-gray-50">
