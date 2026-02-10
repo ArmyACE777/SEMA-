@@ -340,7 +340,8 @@ const isValidDateRange = (item: StrapiItem): boolean => {
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     {berita.map((item) => (
-                    <Link key={item.id} href={`/berita/${getSlug(item)}`}>
+
+                    <Link key={`berita-${item.id}-${getImage(item)}`} href={`/berita/${getSlug(item)}`}>
                       <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full">
                         <div className="relative w-full h-48 overflow-hidden bg-gray-200">
                           <Image
