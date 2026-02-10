@@ -19,24 +19,8 @@ import { Calendar, User, Search, Clock, Bell, AlertCircle } from 'lucide-react'
 import PengumumanModal from '@/components/PengumumanModal'
 import { OrganisasiSidebar } from '@/components/ui/layout/OrganisasiSidebar'
 import { FooterSection } from '@/components/layout/FooterSection'
+import { getImage } from '@/lib/helpers'
 
-export const getImage = (item: StrapiItem): string => {
-  try {
-    if (!item) return '/images/placeholder.svg'
-
-    const url =
-      item.attributes?.gambar?.data?.attributes?.url ||
-      item.gambar?.data?.attributes?.url
-
-    if (!url) return '/images/placeholder.svg'
-
-    if (url.startsWith('http')) return url
-
-    return `${process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://victorious-animal-46b1eb6b21.strapiapp.com'}${url}`
-  } catch {
-    return '/images/placeholder.svg'
-  }
-}
 
 /**
  * ============ TYPE DEFINITIONS ============
