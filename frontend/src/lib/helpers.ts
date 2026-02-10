@@ -56,22 +56,39 @@ export const getImage = (item: StrapiItem | null): string => {
   try {
     if (!item) return IMAGE.PLACEHOLDER
     
+    // Get gambar object (support both direct and attributes)
     const gambar = item.gambar || item.attributes?.gambar
     if (!gambar) return IMAGE.PLACEHOLDER
     
+    let url: string | undefined
+    
+    // Check if gambar is an object
     if (typeof gambar === 'object' && gambar !== null) {
-      const url = (gambar as Record<string, any>).url
-      if (typeof url === 'string') {
-        if (url.startsWith('http')) return url
-        return `${process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://victorious-animal-46b1eb6b21.strapiapp.com'}${url}`
+      const gambarObj = gambar as Record<string, any>
+      
+      // ✅ FLAT structure: gambar.url (homepage)
+      url = gambarObj.url
+      
+      // ✅ NESTED structure: gambar.data.attributes.url (berita slug)
+      if (!url && gambarObj.data?.attributes?.url) {
+        url = gambarObj.data.attributes.url
       }
     }
     
-    return IMAGE.PLACEHOLDER
-  } catch {
+    // Fallback
+    if (!url || typeof url !== 'string') return IMAGE.PLACEHOLDER
+    
+    // Return full URL
+    if (url.startsWith('http')) return url
+    
+    return `${process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://victorious-animal-46b1eb6b21.strapiapp.com'}${url}`
+    
+  } catch (error) {
+    console.error('getImage error:', error)
     return IMAGE.PLACEHOLDER
   }
 }
+
 
 export const getAuthor = (item: StrapiItem | null): string => {
   if (!item) return 'Unknown'
