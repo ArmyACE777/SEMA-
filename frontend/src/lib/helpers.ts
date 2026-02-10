@@ -52,37 +52,29 @@ export const getContent = (item: StrapiItem | null): string => {
   return ''
 }
 
-export const getImage = (item: StrapiItem | null): string => {
+export const getImage = (item: any): string => {
   try {
     if (!item) return IMAGE.PLACEHOLDER
     
-    // Get gambar object (support both direct and attributes)
+    // Get gambar object
     const gambar = item.gambar || item.attributes?.gambar
     if (!gambar) return IMAGE.PLACEHOLDER
     
-    let url: string | undefined
-    
-    // Check if gambar is an object
-    if (typeof gambar === 'object' && gambar !== null) {
-      const gambarObj = gambar as Record<string, any>
-      
-      // ✅ FLAT structure: gambar.url (homepage)
-      url = gambarObj.url
-      
-      // ✅ NESTED structure: gambar.data.attributes.url (berita slug)
-      if (!url && gambarObj.data?.attributes?.url) {
-        url = gambarObj.data.attributes.url
-      }
+    // Direct URL (flat structure - HOMEPAGE)
+    if (gambar.url) {
+      const url = gambar.url
+      if (url.startsWith('http')) return url
+      return `${process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://victorious-animal-46b1eb6b21.strapiapp.com'}${url}`
     }
     
-    // Fallback
-    if (!url || typeof url !== 'string') return IMAGE.PLACEHOLDER
+    // Nested URL (berita slug)
+    if (gambar.data?.attributes?.url) {
+      const url = gambar.data.attributes.url
+      if (url.startsWith('http')) return url
+      return `${process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://victorious-animal-46b1eb6b21.strapiapp.com'}${url}`
+    }
     
-    // Return full URL
-    if (url.startsWith('http')) return url
-    
-    return `${process.env.NEXT_PUBLIC_STRAPI_API_URL || 'https://victorious-animal-46b1eb6b21.strapiapp.com'}${url}`
-    
+    return IMAGE.PLACEHOLDER
   } catch (error) {
     console.error('getImage error:', error)
     return IMAGE.PLACEHOLDER
