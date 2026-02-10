@@ -70,8 +70,8 @@ const org = {
   logo: '/images/Kebma.jpeg', 
   fullName: 'Keluarga Besar Mahasiswa', 
   deskripsi: 'Organisasi tertinggi tingkat mahasiswa...', 
-  anggota: 50, kontak: { email: 'sema@hima-iaipi.ac.id', 
-    phone: '+62 812-3456-7890', lokasi: 'Ruang SEMA, Gedung Mahasiswa Lt. 2', }, 
+  anggota: 0, kontak: { email: 'antumana444@gmail.com', 
+    phone: '+62 89-524-396-122', lokasi: 'Ruang SEMA, Gedung Mahasiswa Lt. 2', }, 
     color: 'from-blue-500 to-blue-600', bgColor: 'bg-blue-50', textColor: 'text-blue-600', }
     
   if (!org) {
