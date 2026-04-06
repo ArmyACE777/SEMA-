@@ -82,9 +82,12 @@ export default function TentangPage() {
                 <div className="flex items-start gap-4 mb-3">
                   <FileText className="w-6 h-6 text-green-600 flex-shrink-0 mt-1" />
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">NA/ND GBHO</h3>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Anggaran Dasar</h3>
+                    <p className="text-gray-600 mb-4">
+                      Dokumen dasar yang memuat ketentuan fundamental organisasi Senat Mahasiswa IAIPI, termasuk struktur, hak, dan kewajiban anggota.
+                    </p>
                     <a
-                      href="https://drive.google.com/drive/folders/1yw7dHVxC2zXI4hLYQf9Qwqpti2yBCL7f"
+                      href="https://drive.google.com/file/d/AD_GANTI_LINK_ANGGARAN_DASAR/view"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 font-semibold transition-colors"
@@ -102,9 +105,12 @@ export default function TentangPage() {
                 <div className="flex items-start gap-4 mb-3">
                   <FileText className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">TAP SEMA</h3>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Anggaran Rumah Tangga</h3>
+                    <p className="text-gray-600 mb-4">
+                      Peraturan pelaksanaan dari anggaran dasar yang merinci mekanisme operasional, prosedur, dan tata cara penyelenggaraan organisasi.
+                    </p>
                     <a
-                      href="https://drive.google.com/drive/folders/1ywJ1jtItCfOf_ICmT59mvs7O7Q3JhMkI"
+                      href="https://drive.google.com/file/d/ART_GANTI_LINK_ANGGARAN_RUMAH_TANGGA/view"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold transition-colors"
@@ -115,6 +121,50 @@ export default function TentangPage() {
                     </a>
                   </div>
                 </div>
+              </div>
+
+              {/* Tata Tertib */}
+              <div>
+                <div className="flex items-start gap-4">
+                  <FileText className="w-6 h-6 text-amber-600 flex-shrink-0 mt-1" />
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Tata Tertib</h3>
+                    <p className="text-gray-600 mb-4">
+                      Norma, standar etika, dan pedoman perilaku yang harus dipatuhi oleh seluruh anggota organisasi dalam menjalankan fungsi dan aktivitas mereka.
+                    </p>
+                    <a
+                      href="https://drive.google.com/file/d/TT_GANTI_LINK_TATA_TERTIB/view"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-amber-600 hover:text-amber-700 font-semibold transition-colors"
+                    >
+                      <Download className="w-4 h-4" />
+                      Unduh Dokumen Lengkap
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+            <div className="flex gap-4">
+              <FileText className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
+              <div>
+                <h4 className="font-bold text-gray-900 mb-2">Akses Dokumen Lengkap</h4>
+                <p className="text-gray-600 mb-4">
+                  Untuk melihat semua dokumen regulasi dan versi terbaru, silakan kunjungi folder Google Drive Senat Mahasiswa IAIPI
+                </p>
+                <a
+                  href="https://drive.google.com/drive/folders/GANTI_FOLDER_ID"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold"
+                >
+                  Buka Folder Drive
+                  <ExternalLink className="w-4 h-4" />
+                </a>
               </div>
             </div>
           </div>
