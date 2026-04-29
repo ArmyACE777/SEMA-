@@ -32,6 +32,8 @@ module.exports = [
       origin: [
         // Production
         'https://sema-iaipi.vercel.app',
+        'https://www.sema-iaipi.com',
+        'https://sema-iaipi.com',
         
         // Vercel preview deployments
         'https://sema-iaipi-git-*.vercel.app',
