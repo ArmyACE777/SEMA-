@@ -71,7 +71,7 @@ const org = {
   fullName: 'Keluarga Besar Mahasiswa', 
   deskripsi: 'Organisasi tertinggi tingkat mahasiswa...', 
   anggota: 0, kontak: { email: 'antumana444@gmail.com', 
-    phone: '+62 89-524-396-122', lokasi: 'Ruang SEMA, Gedung Mahasiswa Lt. 2', }, 
+    phone: '+62 89-524-396-122', lokasi: 'IAI PERSIS Garut, Jl. Aruji Kartawinata, Haurpanggung, Kec. Tarogong Kidul, Kabupaten Garut, Jawa Barat 44151', }, 
     color: 'from-blue-500 to-blue-600', bgColor: 'bg-blue-50', textColor: 'text-blue-600', }
     
   if (!org) {

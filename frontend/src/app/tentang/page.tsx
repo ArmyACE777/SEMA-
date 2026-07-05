@@ -139,36 +139,6 @@ export default function TentangPage() {
                 <ExternalLink className="w-4 h-4" />
               </Link>
             </div>
-
-            {/* Card 2 */}
-            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl border border-blue-200 p-8">
-              <div className="w-14 h-14 bg-blue-600 rounded-lg flex items-center justify-center mb-6">
-                <Target className="w-7 h-7 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Program Kerja</h3>
-              <p className="text-gray-600 mb-6">
-                Kumpulan program dan kegiatan yang telah dan akan dilaksanakan organisasi
-              </p>
-              <Link href="#" className="text-blue-600 hover:text-blue-700 font-semibold inline-flex items-center gap-2">
-                Lihat Detail
-                <ExternalLink className="w-4 h-4" />
-              </Link>
-            </div>
-
-            {/* Card 3 */}
-            <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border border-amber-200 p-8">
-              <div className="w-14 h-14 bg-amber-600 rounded-lg flex items-center justify-center mb-6">
-                <Heart className="w-7 h-7 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Nilai-Nilai Kami</h3>
-              <p className="text-gray-600 mb-6">
-                Prinsip dan nilai-nilai yang menjadi fondasi organisasi kami
-              </p>
-              <Link href="#" className="text-amber-600 hover:text-amber-700 font-semibold inline-flex items-center gap-2">
-                Lihat Detail
-                <ExternalLink className="w-4 h-4" />
-              </Link>
-            </div>
           </div>
         </section>
 
@@ -177,49 +147,6 @@ export default function TentangPage() {
           <h2 className="text-4xl font-bold text-gray-900 mb-12">Hubungi Kami</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Contact Form */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">Kirim Pesan</h3>
-              <form className="space-y-5">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Nama Anda
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Masukkan nama lengkap"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100 transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    placeholder="email@example.com"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100 transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Pesan
-                  </label>
-                  <textarea
-                    placeholder="Tulis pesan Anda di sini..."
-                    rows={5}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100 transition-all resize-none"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
-                >
-                  Kirim Pesan
-                </button>
-              </form>
-            </div>
-
             {/* Contact Info */}
             <div className="space-y-6">
               {/* Phone */}
@@ -230,7 +157,7 @@ export default function TentangPage() {
                   </div>
                   <div>
                     <h4 className="font-bold text-gray-900 mb-1">Telepon</h4>
-                    <p className="text-gray-600">+62 812-3456-7890</p>
+                    <p className="text-gray-600">+62 8952-4396-122</p>
                     <p className="text-gray-500 text-sm mt-1">Senin - Jumat, 09:00 - 17:00</p>
                   </div>
                 </div>
@@ -244,7 +171,7 @@ export default function TentangPage() {
                   </div>
                   <div>
                     <h4 className="font-bold text-gray-900 mb-1">Email</h4>
-                    <p className="text-gray-600">senat@iaipi.ac.id</p>
+                    <p className="text-gray-600">semaiaipigarut@gmail.com</p>
                     <p className="text-gray-500 text-sm mt-1">Kami akan membalas dalam 24 jam</p>
                   </div>
                 </div>
@@ -258,7 +185,7 @@ export default function TentangPage() {
                   </div>
                   <div>
                     <h4 className="font-bold text-gray-900 mb-1">Lokasi</h4>
-                    <p className="text-gray-600">Jl. Pendidikan No. 123</p>
+                    <p className="text-gray-600">IAI PERSIS Garut, Jl. Aruji Kartawinata, Haurpanggung, Kec. Tarogong Kidul</p>
                     <p className="text-gray-600">Garut, Jawa Barat 44151</p>
                   </div>
                 </div>
@@ -274,7 +201,7 @@ export default function TentangPage() {
                   </div>
                   <div>
                     <h4 className="font-bold text-gray-900 mb-1">Instagram</h4>
-                    <p className="text-gray-600">@iaipi_senatmahasiswa</p>
+                    <p className="text-gray-600">@semaiaipigarut</p>
                     <p className="text-gray-500 text-sm mt-1">Ikuti update dan berita terbaru</p>
                   </div>
                 </div>
